@@ -11,7 +11,6 @@ int main(int argc, char *argv[]){
     if(argc != 2)
         cout << "" << endl;
     else{
-        cout << argv[1] << endl;
         Bruteforce *bruteforce = new Bruteforce(argv[1]);
         bruteforce->start();
     }

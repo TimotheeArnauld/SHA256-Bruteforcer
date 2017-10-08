@@ -18,7 +18,7 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        void generate(char *, int );
+        void generate(char *, int);
         bool compare(string str);
 };
 
