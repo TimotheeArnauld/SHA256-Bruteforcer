@@ -7,7 +7,7 @@ Bruteforce::Bruteforce(string hash){
 }
 
 void Bruteforce::start(){
-	int max_size = 4;
+	int max_size = 100;
 
 	for(int n = 0; n < max_size; n++){
 		char *str = (char*)malloc(n);
