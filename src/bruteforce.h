@@ -4,6 +4,7 @@
 #include <string>
 #include <iostream>
 #include "sha256.h"
+
 using namespace std;
 
 class Bruteforce{
