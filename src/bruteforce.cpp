@@ -7,11 +7,11 @@ Bruteforce::Bruteforce(string hash){
 }
 
 void Bruteforce::start(){
-	int max_size = 100;
+	int max_size = 4;
 
-	for(int i = 0; i < max_size; i++){
-		char *str = (char*)malloc(i);
-		generate(str, i);    
+	for(int n = 0; n < max_size; n++){
+		char *str = (char*)malloc(n);
+		generate(str, n);    
 		free(str);
     }
 
@@ -27,14 +27,14 @@ void Bruteforce::generate(char *str, int i){
 			cout << str << ": Passphrase found" << endl;
             exit(0);
 		}else{
-
-			generate(str, i-1);
 			cout << str << ": Failed" << endl;
+			generate(str, i-1);
         }
 	}
-  generate(str, i - 1);
-}
+  }
 
 bool Bruteforce::compare(string str){
 	return (this->hash_ == str);
 }
+
+
