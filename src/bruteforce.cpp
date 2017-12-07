@@ -15,8 +15,14 @@ void Bruteforce::start(){
 
 std::list<std::string> Bruteforce::initialize_list(){
 	std::list<std::string> list;
-	for(int i = 0; i < this->dict.size(); i++)
+	for(int i = 0; i < this->dict.size(); i++){
+		if(compare(std::string(1, this->dict[i]))){
+			std::cout << "Password found:" << this->dict[i] << std::endl;
+			list.clear();
+			return list;
+		}
 		list.push_back(std::string(1, this->dict[i]));
+	}
 	return list;
 }
 
@@ -26,6 +32,7 @@ bool Bruteforce::compare(std::string str){
 
 bool Bruteforce::generate(int length) {
 	std::list<std::string> list = initialize_list();
+	if(list.empty()) return true;
 	for(std::list<std::string>::iterator l= list.begin();std::string(*l).size() < length && l != list.end(); l++){
 		for(int j = 0; j < this->dict.size(); j++){
 			list.push_back((*l + this->dict[j]));
