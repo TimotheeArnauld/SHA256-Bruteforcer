@@ -3,24 +3,26 @@
 
 #include <string>
 #include <iostream>
+#include <list>
+#include <ctime>
 #include "sha256.h"
-
-using namespace std;
 
 class Bruteforce{
     private:
-        string dict;
+        std::string dict;
         int dict_size;
         static const int max_size = 1;
-        string hash_;
+        std::string hash_;
+        std::clock_t begin_time;
 
     public:
-        Bruteforce(string hash);
+        Bruteforce(std::string hash);
         ~Bruteforce();
   
         void start();
-        void generate(char *, int);
-        bool compare(string str);
+        bool generate(int);
+        bool compare(std::string str);
+        std::list<std::string> initialize_list();
 };
 
 #endif
