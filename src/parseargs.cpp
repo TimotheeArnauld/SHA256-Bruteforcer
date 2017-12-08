@@ -70,6 +70,7 @@ Datas ParseArgs::parse(){
 void ParseArgs::show_usage(){
 	std::cout << "SHA256-Bruteforcer usages:" << std::endl;
 	std::cout << "-h: display usages" << std::endl;
+	std::cout << "-v SHA256_HASH: verbose mode" << std::endl;
 	std::cout << "-c hello: give the SHA256 hash of 'hello'" << std::endl;
 	std::cout << "SHA256_HASH: retrieve the passphrase" << std::endl;
 }
