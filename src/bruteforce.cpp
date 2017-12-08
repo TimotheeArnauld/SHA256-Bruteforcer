@@ -3,10 +3,14 @@
 Bruteforce::Bruteforce(Datas d){
 	dict = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
     dict_size = dict.length();
+
     this->hash_ = d.hash;
     this->nbCores = d.nbCores;
     this->size = d.size;
+    this->verbose = d.verbose;
+
     this->begin_time = std::clock();
+    list = initialize_list();
 }
 
 void Bruteforce::start(){
@@ -28,6 +32,7 @@ std::list<std::string> Bruteforce::initialize_list(){
 			list.clear();
 			return list;
 		}
+		if(this->verbose) std::cout << "Tested: " << this->dict[i] << std::endl;
 		list.push_back(std::string(1, this->dict[i]));
 	}
 	return list;
@@ -38,17 +43,17 @@ bool Bruteforce::compare(std::string str){
 }
 
 bool Bruteforce::generate(int length) {
-	std::list<std::string> list = initialize_list();
-	if(list.empty()) return true;
-	for(std::list<std::string>::iterator l= list.begin();std::string(*l).size() < length && l != list.end(); l++){
+	if(this->list.empty()) return true;
+	for(std::list<std::string>::iterator l= this->list.begin();std::string(*l).size() < length && l != this->list.end(); l++){
 		for(int j = 0; j < this->dict.size(); j++){
 			list.push_back((*l + this->dict[j]));
 			if(compare(*l + this->dict[j])){
 				std::cout << "Password found:" << (*l + this->dict[j]) << std::endl;
 				return true;
 			}
+			if(this->verbose) std::cout << "Tested: " << (*l + this->dict[j]) << std::endl;
 		}
-		list.pop_front();
+		this->list.pop_front();
 	}
 	std::cout << "Password not found for size " << length << std::endl;
 	return false;

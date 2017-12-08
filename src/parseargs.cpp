@@ -5,6 +5,7 @@ ParseArgs::ParseArgs(int argc, char **argv){
 	this->vargs = argv;
 	d.size = 0;
 	d.nbCores = -1;
+	d.verbose = false;
 }
 
 ParseArgs::~ParseArgs(){
@@ -16,7 +17,7 @@ Datas ParseArgs::parse(){
 		switch (this->f.c)
 		{
 			case 'v':
-			this->f.vflag = 1;
+			this->d.verbose = true;
 			break;
 			case 't':
 			sscanf(optarg, "%d", &this->d.nbCores);

@@ -17,6 +17,9 @@ class Bruteforce{
         std::string hash_;
         int size;
         int nbCores;
+        bool verbose;
+
+        std::list<std::string> list;
 
         std::clock_t begin_time;
 

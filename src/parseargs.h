@@ -26,6 +26,7 @@ struct Datas{
 	int nbCores;
 	std::string hash;
 	int size;
+	bool verbose;
 	bool letsgo;
 };
 
