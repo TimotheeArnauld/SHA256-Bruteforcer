@@ -9,7 +9,7 @@ int main(int argc, char *argv[]){
 	Datas d = parseargs->parse();
 
 	if(d.letsgo){
-		Bruteforce *bruteforce = new Bruteforce(d.hash);
+		Bruteforce *bruteforce = new Bruteforce(d);
 		bruteforce->start();
 	}
 

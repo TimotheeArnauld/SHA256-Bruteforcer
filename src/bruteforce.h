@@ -5,18 +5,23 @@
 #include <iostream>
 #include <list>
 #include <ctime>
+
 #include "sha256.h"
+#include "parseargs.h"
 
 class Bruteforce{
     private:
         std::string dict;
         int dict_size;
-        static const int max_size = 1;
+
         std::string hash_;
+        int size;
+        int nbCores;
+
         std::clock_t begin_time;
 
     public:
-        Bruteforce(std::string hash);
+        Bruteforce(Datas d);
         ~Bruteforce();
   
         void start();

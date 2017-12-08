@@ -17,16 +17,15 @@ struct Flags
 	int t;
 	int s;
 	int c;
-	int l;
 	char* tvalue;
 	char* svalue;
 	char* cvalue;
-	char* lvalue;
 };
 
 struct Datas{
 	int nbCores;
 	std::string hash;
+	int size;
 	bool letsgo;
 };
 

@@ -1,15 +1,22 @@
 #include "bruteforce.h"
 
-Bruteforce::Bruteforce(std::string hash){
+Bruteforce::Bruteforce(Datas d){
 	dict = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
     dict_size = dict.length();
-    this->hash_ = hash;
+    this->hash_ = d.hash;
+    this->nbCores = d.nbCores;
+    this->size = d.size;
     this->begin_time = std::clock();
 }
 
 void Bruteforce::start(){
-	int max_size = 100;
-	for(int n = 1; n < max_size && !generate(n); n++);
+	if(this->size != 0){
+		std::cout << "Enable processing for size:" << this->size << std::endl;
+		generate(this->size);
+	}else{
+		int max_size = 100;
+		for(int n = 1; n < max_size && !generate(n); n++);
+	}
 	std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
 }
 

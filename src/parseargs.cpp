@@ -3,6 +3,8 @@
 ParseArgs::ParseArgs(int argc, char **argv){
 	this->nargs = argc;
 	this->vargs = argv;
+	d.size = 0;
+	d.nbCores = -1;
 }
 
 ParseArgs::~ParseArgs(){
@@ -10,45 +12,44 @@ ParseArgs::~ParseArgs(){
 }
 
 Datas ParseArgs::parse(){
-	while ((this->f.c = getopt (nargs, vargs, "vht:s:c:l:c:")) != -1){
+	while ((this->f.c = getopt (nargs, vargs, "vht:s:c:c:")) != -1){
 		switch (this->f.c)
 		{
 			case 'v':
 			this->f.vflag = 1;
 			break;
 			case 't':
-			this->f.tvalue = optarg;
+			sscanf(optarg, "%d", &this->d.nbCores);
 			break;
 			case 's':
-			this->f.svalue = optarg;
+			sscanf(optarg, "%d", &this->d.size);
 			break;
 			case 'c':
 				std::cout << "The hash of " << optarg << " is: " << sha256(optarg) << std::endl;
 				this->d.letsgo = false;
-				return this->d;
-			break;
-			case 'l':
-			this->f.lvalue = optarg;
 			break;
 			case 'h':
 				show_usage();
 				this->d.letsgo = false;
-				return this->d;
 			break;
 			case '?':
 			if (optopt == 't' || optopt == 's' || optopt == 'c' || optopt == 'l'){
 				fprintf (stderr, "Option -%c requires an argument.\n", optopt);
 				std::cout << "-h to see usages" << std::endl;
+				this->d.letsgo = false;
 			}
 			else if (isprint (optopt)){
 				fprintf (stderr, "Unknown option `-%c'.\n", optopt);
 				std::cout << "-h to see usages" << std::endl;
+				this->d.letsgo = false;
 			}
 			else{
 				fprintf (stderr, "Unknown option character `\\x%x'.\n", optopt);
 				std::cout << "-h to see usages" << std::endl;
+				this->d.letsgo = false;
 			}
 			default:
+			this->d.letsgo = false;
 			abort ();
 		}
 	}
@@ -56,13 +57,12 @@ Datas ParseArgs::parse(){
 		if(strlen(vargs[i]) == 64){
 			this->d.hash = vargs[i];
 			this->d.letsgo = true;
-			return d;
 		}else{
 			printf ("Non-option argument %s\n", vargs[i]);
 			std::cout << "-h to see usages" << std::endl;
+			this->d.letsgo = false;
 		}
 	}
-	this->d.letsgo = false;
 	return d;
 }
 
