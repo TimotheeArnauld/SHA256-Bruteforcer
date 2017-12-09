@@ -5,6 +5,7 @@
 #include <iostream>
 #include <list>
 #include <ctime>
+#include <thread>
 
 #include "sha256.h"
 #include "parseargs.h"
@@ -29,7 +30,7 @@ class Bruteforce{
   
         void start();
         bool generate(int);
-        bool compare(std::string str);
+        bool compare();
         std::list<std::string> initialize_list();
 };
 
