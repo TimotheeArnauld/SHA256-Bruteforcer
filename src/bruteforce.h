@@ -5,6 +5,10 @@
 #include <iostream>
 #include <list>
 #include <ctime>
+#include <vector>
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 #include <functional>
 #include <future>
@@ -22,6 +26,7 @@ class Bruteforce{
         int size;
         int nbCores;
         bool verbose;
+        std::mutex mutex;
 
         std::clock_t begin_time;
         bool found;
@@ -31,7 +36,7 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        bool generate(int);
+        void generate(int);
         bool compare(std::string);
         std::list<std::string> initialize_list();
 };
