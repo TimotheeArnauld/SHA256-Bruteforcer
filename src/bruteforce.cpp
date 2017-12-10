@@ -16,12 +16,34 @@ Bruteforce::Bruteforce(Datas d){
 }
 
 void Bruteforce::start(){
-	if(this->size != 0){
-		std::cout << "Enable processing for size:" << this->size << std::endl;
-		generate(this->size);
-	}else{
-		int max_size = 100;
-		for(int n = 1; n < max_size && !generate(n); n++);
+	if(!list.empty()){
+		if(this->size != 0){
+			std::cout << "Enable processing for size:" << this->size << std::endl;
+			generate(list, this->size);
+		}else{
+			int nbCores = 4;
+			int max_size = 100;
+			std::list<std::string> tmp[nbCores];
+
+			for(int n = 1; n < max_size; n++){
+				int s = list.size();
+				std::list<std::string>::iterator it = list.begin();
+				for(int i = 0; i < nbCores; i++){
+					std::advance(it, s / nbCores);
+					if(i == nbCores - 1){
+						tmp[i].splice(tmp[i].begin(), list);
+					}else{
+						tmp[i].splice(tmp[i].begin(), list, list.begin(), it);
+					}
+				}
+
+				for(int i = 0; i < nbCores; i++){
+					list.splice(list.end(), generate(tmp[i], n));
+					tmp[i].clear();
+				}
+				std::cout << "Password not found for size " << n << std::endl;
+			}
+		}
 	}
 	std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
 }
@@ -29,8 +51,6 @@ void Bruteforce::start(){
 std::list<std::string> Bruteforce::initialize_list(){
 	std::list<std::string> list;
 	for(int i = 0; i < this->dict.size(); i++){
-		//auto res = std::async(std::launch::async, &Bruteforce::compare, this, std::string(1, this->dict[i]));
-		//if(res.get()){
 		if(compare(std::string(1, this->dict[i]))){
 			std::cout << "Password found:" << this->dict[i] << std::endl;
 			list.clear();
@@ -46,21 +66,18 @@ bool Bruteforce::compare(std::string str){
 		return (this->hash_.compare(sha256(str)) == 0)?true:false;
 }
 
-bool Bruteforce::generate(int length) {
-	if(this->list.empty()) return true;
-	for(std::list<std::string>::iterator l= this->list.begin();std::string(*l).size() < length && l != this->list.end(); l++){
+std::list<std::string> Bruteforce::generate(std::list<std::string> list_, int length) {
+	for(std::list<std::string>::iterator l= list_.begin();std::string(*l).size() < length && l != list_.end(); l++){
 		for(int j = 0; j < this->dict.size(); j++){
-			list.push_back((*l + this->dict[j]));
-			//auto res = std::async(std::launch::async, &Bruteforce::compare, this, (*l + this->dict[j]));
-			//if(res.get()){
+			list_.push_back((*l + this->dict[j]));
 			if(compare((*l + this->dict[j]))){
 				std::cout << "Password found:" << (*l + this->dict[j]) << std::endl;
-				return true;
+				std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
+				exit(0);
 			}
 			if(this->verbose) std::cout << "Tested: " << (*l + this->dict[j]) << std::endl;
 		}
-		this->list.pop_front();
+		list_.pop_front();
 	}
-	std::cout << "Password not found for size " << length << std::endl;
-	return false;
+	return list_;
 }
