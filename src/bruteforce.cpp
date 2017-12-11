@@ -21,7 +21,6 @@ void Bruteforce::start(){
 		generate(this->size);
 	}else{
 		int max_size = 100;
-		std::vector<std::thread> threads;
 		int nbThreads;
 
 		if(this->nbCores != -1)
@@ -29,15 +28,18 @@ void Bruteforce::start(){
 		else 
 			nbThreads = 5;
 
+		std::thread threads[nbThreads];
 		int s = 1;
+
 		for(int i=0; i<nbThreads; i++){
-			threads.push_back(std::thread(&Bruteforce::generate, this, s));
+			threads[i] = std::thread(&Bruteforce::generate, this, s);
 			threads[i].join();
-			if( s <= max_size ){
+
+			if(s <= max_size){
 				s++;
 			}
 
-			if(i == 4 && found != true && s <= max_size){
+			if(i == nbThreads - 1 && !found && s <= max_size){
 				i = 0;
 			}
 		}
