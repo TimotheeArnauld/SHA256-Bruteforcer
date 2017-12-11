@@ -39,7 +39,7 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        void generate(std::list<std::string> *, int, std::promise<bool> &&p);
+        void generate(std::list<std::string> *, int, std::atomic_bool &isFound);
         bool compare(std::string);
         std::list<std::string> initialize_list();
 };
