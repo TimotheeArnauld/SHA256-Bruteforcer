@@ -10,6 +10,8 @@
 #include <atomic>
 #include <mutex>
 
+#include <chrono>
+
 #include <vector>
 #include <thread>
 #include <future>
@@ -37,7 +39,7 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        void generate(std::list<std::string>, int, std::promise<std::list<std::string>> && p);
+        void generate(std::list<std::string> *, int, std::promise<bool> &&p);
         bool compare(std::string);
         std::list<std::string> initialize_list();
 };

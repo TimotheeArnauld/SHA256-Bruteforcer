@@ -1,7 +1,5 @@
 #include "bruteforce.h"
 
-bool compare(std::string str);
-
 Bruteforce::Bruteforce(Datas d){
     dict = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
     dict_size = dict.length();
@@ -15,14 +13,20 @@ Bruteforce::Bruteforce(Datas d){
 }
 
 void Bruteforce::start(){
-    if(!list.empty()){
-        int nbCores = 4;
-        int max_size = 100;
-        std::list<std::string> tmp[nbCores];
+    int nbCores = std::thread::hardware_concurrency() - 1;
+    int max_size = 100;
+    bool isFound = false;
+    std::vector<std::thread> threads;
+    threads.reserve(nbCores);
 
-        for(int n = 1; n < max_size; n++){
+    if(!list.empty()){
+        for(int n = 1; n < max_size && !isFound; n++){
             int s = list.size();
+            std::list<std::string> tmp[nbCores];
+            std::promise<bool> p[nbCores];
+            std::vector<std::future<bool>> futures;
             std::list<std::string>::iterator it = list.begin();
+
             for(int i = 0; i < nbCores; i++){
                 std::advance(it, s / nbCores);
                 if(i == nbCores - 1){
@@ -31,24 +35,33 @@ void Bruteforce::start(){
                     tmp[i].splice(tmp[i].begin(), list, list.begin(), it);
                 }
             }
-
-            std::promise<std::list<std::string>> p[nbCores];
-            std::thread t[nbCores];
-            std::vector<std::future<std::list<std::string>>> futures;
-
             for(int i = 0; i < nbCores; i++){
                 auto f = p[i].get_future();
                 futures.push_back(std::move(f));
-                t[i] = std::thread(&Bruteforce::generate, this, tmp[i], n, std::move(p[i]));
-                t[i].join();
-                list.splice(list.end(), futures[i].get());
-                tmp[i].clear();
+                std::thread t([&, n, i](){
+                    generate(&tmp[i], n, std::move(p[i]));
+                });
+                threads.push_back(std::move(t));
+                futures.at(i).wait();
             }
-
-            std::cout << "Password not found for size " << n << std::endl;
+            for(int i = 0; i < nbCores && !isFound; i++){
+                if(futures.at(i).get() == true){
+                    isFound = true;
+                    std::cout << "Password found, exiting..." << std::endl;
+                    threads.at(i).join();
+                    for(int j = i; j < nbCores; j++)
+                        threads[j].detach();
+                }else{
+                    threads.at(i).join();   
+                }
+                list.splice(list.end(), tmp[i], tmp[i].begin(), tmp[i].end());
+            }
+            threads.clear();
+            if(!isFound)
+                std::cout << "Password not found for size " << n << std::endl;
         }
     }
-    std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
+    return;
 }
 
 std::list<std::string> Bruteforce::initialize_list(){
@@ -69,18 +82,19 @@ bool Bruteforce::compare(std::string str){
 		return (this->hash_.compare(sha256(str)) == 0)?true:false;
 }
 
-void Bruteforce::generate(std::list<std::string> list_, int length, std::promise<std::list<std::string>> && p) {
-    for(std::list<std::string>::iterator l= list_.begin();std::string(*l).size() < length && l != list_.end(); l++){
-        for(int j = 0; j < this->dict.size(); j++){
-            list_.push_back((*l + this->dict[j]));
+void Bruteforce::generate(std::list<std::string> *list, int length, std::promise<bool> &&p) {
+    bool isFound = false;
+    for(std::list<std::string>::iterator l= list->begin();std::string(*l).size() < length && l != list->end() && !isFound; l++){
+        for(int j = 0; j < this->dict.size() && !isFound; j++){
+            list->push_back((*l + this->dict[j]));
             if(compare((*l + this->dict[j]))){
                 std::cout << "Password found:" << (*l + this->dict[j]) << std::endl;
                 std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
-                exit(0);
+                isFound = true;
             }
             if(this->verbose) std::cout << "Tested: " << (*l + this->dict[j]) << std::endl;
         }
-        list_.pop_front();
+        list->pop_front();
     }
-    p.set_value(list_);
+    p.set_value((isFound)?true:false);
 }
