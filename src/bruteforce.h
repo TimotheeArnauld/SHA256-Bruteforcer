@@ -10,10 +10,7 @@
 #include <atomic>
 #include <mutex>
 
-#include <chrono>
-
-#include <vector>
-#include <thread>
+#include <functional>
 #include <future>
 
 #include "sha256.h"
@@ -39,10 +36,9 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        void generate(std::list<std::string> *, int, std::atomic_bool &isFound);
+        void generate(int);
         bool compare(std::string);
         std::list<std::string> initialize_list();
 };
 
 #endif
-

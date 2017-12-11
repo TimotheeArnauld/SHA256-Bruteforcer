@@ -15,14 +15,17 @@ struct Flags
 {
 	int vflag;
 	int t;
+	int s;
 	int c;
 	char* tvalue;
+	char* svalue;
 	char* cvalue;
 };
 
 struct Datas{
 	int nbCores;
 	std::string hash;
+	int size;
 	bool verbose;
 	bool letsgo;
 };
@@ -43,4 +46,3 @@ public:
 };
 
 #endif
-

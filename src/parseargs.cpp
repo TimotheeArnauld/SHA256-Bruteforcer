@@ -3,6 +3,7 @@
 ParseArgs::ParseArgs(int argc, char **argv){
 	this->nargs = argc;
 	this->vargs = argv;
+	d.size = 0;
 	d.nbCores = -1;
 	d.verbose = false;
 }
@@ -12,7 +13,7 @@ ParseArgs::~ParseArgs(){
 }
 
 Datas ParseArgs::parse(){
-	while ((this->f.c = getopt (nargs, vargs, "vht:c:c:")) != -1){
+	while ((this->f.c = getopt (nargs, vargs, "vht:s:c:c:")) != -1){
 		switch (this->f.c)
 		{
 			case 'v':
@@ -20,6 +21,9 @@ Datas ParseArgs::parse(){
 			break;
 			case 't':
 			sscanf(optarg, "%d", &this->d.nbCores);
+			break;
+			case 's':
+			sscanf(optarg, "%d", &this->d.size);
 			break;
 			case 'c':
 				std::cout << "The hash of " << optarg << " is: " << sha256(optarg) << std::endl;
