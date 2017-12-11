@@ -18,7 +18,6 @@ void Bruteforce::start(){
     //int nbCores = std::thread::hardware_concurrency() - 1;
     int nbCores = 1;
     int max_size = 100;
-    bool areAllJoined = false;
 
     if(!list.empty()){
         isFound = false;
@@ -44,35 +43,11 @@ void Bruteforce::start(){
                         generate(&tmp[i], n, isFound);
                     }));
                     if(threads.at(i).joinable()){
-                            /*std::cout << "SIZE BEFORE " << threads.size() << std::endl;
-                            std::cout << "THREAD NUMBER " << i << std::endl;*/
-                            threads.at(i).join();
-                            list.splice(list.end(), tmp[i], tmp[i].begin(), tmp[i].end());
-                            areAllJoined = true;
-                            threads.erase(threads.begin() + i);
-                            //std::cout << "SIZE AFTER " << threads.size() << std::endl;
-                        }else{
-                            areAllJoined = false;
-                        }
-                }
-
-
-                /*while(!areAllJoined){
-                    for(int i = 0; i < threads.size(); i++){
-                        if(threads.at(i).joinable()){
-                            std::cout << "SIZE BEFORE " << threads.size() << std::endl;
-                            std::cout << "THREAD NUMBER " << i << std::endl;
-                            threads.at(i).join();
-                            list.splice(list.end(), tmp[i], tmp[i].begin(), tmp[i].end());
-                            areAllJoined = true;
-                            threads.erase(threads.begin() + i);
-                            std::cout << "SIZE AFTER " << threads.size() << std::endl;
-                        }else{
-                            areAllJoined = false;
-                        }
+                        threads.at(i).join();
+                        list.splice(list.end(), tmp[i], tmp[i].begin(), tmp[i].end());
+                        threads.erase(threads.begin() + i);
                     }
-                }*/
-                //threads.clear();
+                }
             }
             std::cout << "Password not found for size " << n << std::endl;
         }
