@@ -1,0 +1,14 @@
+projet.zip:
+
+/src/CMakeList.txt
+/src/main.cpp
+
+/doc/... -> 
+
+CMD:
+
+unzip projet.zip
+cd projet/src
+cmake .. && make
+./main
+./main NB_THREAD "HASH_256"
