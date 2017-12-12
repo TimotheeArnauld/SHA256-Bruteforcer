@@ -2,8 +2,6 @@
 
 bool compare(std::string str);
 
-//
-
 Bruteforce::Bruteforce(Datas d){
 	dict = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
 
