@@ -4,87 +4,122 @@ bool compare(std::string str);
 
 Bruteforce::Bruteforce(Datas d){
 	dict = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ 0123456789";
-    dict_size = dict.length();
 
     this->hash_ = d.hash;
     this->nbCores = d.nbCores;
     this->size = d.size;
     this->verbose = d.verbose;
-
-    this->begin_time = std::clock();
-    list = initialize_list();
 }
 
 void Bruteforce::start(){
-	if(this->size != 0){
-		std::cout << "Enable processing for size:" << this->size << std::endl;
-		generate(this->size);
-	}else{
-		int max_size = 100;
-		int nbThreads;
+	int max_size = 100;
+	int nbThreads;
 
-		if(this->nbCores != -1)
-			nbThreads = this->nbCores;
-		else 
-			nbThreads = 5;
+	std::atomic_bool isFound;
+	isFound = false;
+	if(this->nbCores != -1)
+		nbThreads = this->nbCores;
+	else 
+		nbThreads = 5;
 
-		std::thread threads[nbThreads];
-		int s = 1;
+	std::cout << "PREPARING FOR " << nbThreads << " THREADS" << std::endl;
 
-		for(int i=0; i<nbThreads; i++){
-			threads[i] = std::thread(&Bruteforce::generate, this, s);
-			threads[i].join();
+	std::thread threads[nbThreads];
+	clock_gettime(CLOCK_MONOTONIC, &begin);
 
-			if(s <= max_size){
-				s++;
-			}
-
-			if(i == nbThreads - 1 && !found && s <= max_size){
-				i = 0;
+	for(int i = 1; !isFound && i < max_size; i += nbThreads){
+		for(int j=0; j<nbThreads; j++){
+			threads[j] = std::thread(&Bruteforce::generate, this, i + j, std::ref(isFound));
+		}
+		for(int j = 0; j < nbThreads; j++){
+			if(isFound){
+				threads[j].detach();
+			}else{
+				threads[j].join();
+				std::cout << "No password for size: " << i + j << std::endl;
 			}
 		}
 	}
-	std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
+	clock_gettime(CLOCK_MONOTONIC, &finish);
+	elapsed = (finish.tv_sec - begin.tv_sec);
+	elapsed += (finish.tv_nsec - begin.tv_nsec) / 1000000000.0;
+	std::cout << "Duration: " << elapsed << "s" << std::endl;
 }
 
-std::list<std::string> Bruteforce::initialize_list(){
+void Bruteforce::initialize_list(){
 	std::list<std::string> list;
 	for(int i = 0; i < this->dict.size(); i++){
 		if(compare(std::string(1, this->dict[i]))){
 			std::cout << "Password found:" << this->dict[i] << std::endl;
 			list.clear();
-			return list;
 		}
-		if(this->verbose) std::cout << "Tested: " << this->dict[i] << std::endl;
 		list.push_back(std::string(1, this->dict[i]));
 	}
-	return list;
 }
 
 bool Bruteforce::compare(std::string str){
-		return (this->hash_.compare(sha256(str)) == 0)?true:false;
+	return (this->hash_.compare(sha256(str)) == 0);
 }
 
-void Bruteforce::generate(int length) {
-	if(this->list.empty()) return;
-	for(std::list<std::string>::iterator l= this->list.begin();std::string(*l).size() < length && l != this->list.end(); l++){
-		for(int j = 0; j < this->dict.size(); j++){
-			list.push_back((*l + this->dict[j]));
-			if(compare((*l + this->dict[j]))){
+void Bruteforce::generate(int length, std::atomic_bool &isFound) {
+	if(!isFound){
+		std::string str(length, dict.at(0));
+		recursive_generate(str, length, isFound);
+	}
+}
+
+void Bruteforce::recursive_generate(std::string str, int length, std::atomic_bool &isFound){
+	if(isFound)return;
+  	bool finished = false;
+  	bool flag = false;
+
+  	if(verbose){
+  		mutex.lock();
+  		std::cout << str << std::endl;
+  		mutex.unlock();
+  	}
+  	if(compare(str)){
+		std::cout << "Password found: " << str << std::endl;
+		isFound = true;
+	}
+
+	while(!isFound && !finished){
+		for(unsigned int index = length - 1; !finished; index--){
+			if(flag){
+				if(index == -1){
+					finished = true;
+					continue;
+				}
+				if(str.at(index) == dict.at(dict.size() - 1)){
+					flag = true;
+					continue;
+				}else{
+					str.at(index) = dict.at(dict.find(str.at(index)) + 1);
+					str.erase(str.begin() + index + 1, str.end());
+					str.append(length - index - 1, 'a');
+					index = length;
+				}
+			}else{
+				if(str.at(index) == dict.at(dict.size() - 1)){
+					flag = true;
+					continue;
+				}else{
+					str.at(index) = dict.at(dict.find(str.at(index)) + 1);
+					index = length;
+				}
+			}
+			if(verbose){
+		  		mutex.lock();
+		  		std::cout << str << std::endl;
+		  		mutex.unlock();
+		  	}
+			if(compare(str)){
 				mutex.lock();
-				std::cout << "Password found:" << (*l + this->dict[j]) << std::endl;
-				std::cout << "Duration: " << float(std::clock() - this->begin_time) / CLOCKS_PER_SEC << "s" << std::endl;
-				found = true;
+				std::cout << "Password found: " << str << std::endl;
+				isFound = true;
 				mutex.unlock();
-				exit(1);
 				return;
 			}
-			if(this->verbose) std::cout << "Tested: " << (*l + this->dict[j]) << std::endl;
 		}
-		this->list.pop_front();
-	}
-	mutex.lock();
-	std::cout << "Password not found for size " << length << std::endl;
-	mutex.unlock();
-	return;
+	}  	
 }

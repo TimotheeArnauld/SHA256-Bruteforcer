@@ -11,13 +11,10 @@
 
 #include "sha256.h"
 
-struct Flags
-{
+struct Flags{
 	int vflag;
-	int t;
 	int s;
 	int c;
-	char* tvalue;
 	char* svalue;
 	char* cvalue;
 };
@@ -29,6 +26,7 @@ struct Datas{
 	bool verbose;
 	bool letsgo;
 };
+
 
 class ParseArgs{
 private:
