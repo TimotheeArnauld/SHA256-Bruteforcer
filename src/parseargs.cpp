@@ -55,7 +55,7 @@ Datas ParseArgs::parse(){
 		if(strlen(vargs[i]) == 64){
 			this->d.hash = vargs[i];
 			this->d.letsgo = true;
-		}else if(strlen(vargs[i]) == 1){
+		}else if(strlen(vargs[i]) < 3){
 			sscanf(vargs[i], "%d", &this->d.nbCores);
 		}else{
 			printf ("Non-option argument %s\n", vargs[i]);

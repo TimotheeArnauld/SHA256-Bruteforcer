@@ -22,24 +22,30 @@ void Bruteforce::start(){
 	else 
 		nbThreads = 5;
 
-	std::cout << "PREPARING FOR " << nbThreads << " THREADS" << std::endl;
-
 	std::thread threads[nbThreads];
 	clock_gettime(CLOCK_MONOTONIC, &begin);
 
-	for(int i = 1; !isFound && i < max_size; i += nbThreads){
-		for(int j=0; j<nbThreads; j++){
-			threads[j] = std::thread(&Bruteforce::generate, this, i + j, std::ref(isFound));
-		}
-		for(int j = 0; j < nbThreads; j++){
-			if(isFound){
-				threads[j].detach();
+	for(int i = 1; !isFound && i < max_size; i++){
+		int j = 0;
+		for(int k = 0; j <  nbThreads; k += (dict.size() / nbThreads)){
+			if(j == nbThreads - 1){
+				threads[j] = std::thread(&Bruteforce::generate, this, i, std::ref(isFound), k, dict.size());
 			}else{
-				threads[j].join();
-				std::cout << "No password for size: " << i + j << std::endl;
+				threads[j] = std::thread(&Bruteforce::generate, this, i, std::ref(isFound), k, k + (dict.size() / nbThreads) - 1);
+			}
+			
+			j++;
+		}
+		for(int n = 0; n < nbThreads; n++){
+			if(isFound){
+				threads[n].detach();
+			}else{
+				threads[n].join();
 			}
 		}
+		std::cout << "No password for size: " << i << std::endl;
 	}
+
 	clock_gettime(CLOCK_MONOTONIC, &finish);
 	elapsed = (finish.tv_sec - begin.tv_sec);
 	elapsed += (finish.tv_nsec - begin.tv_nsec) / 1000000000.0;
@@ -61,15 +67,16 @@ bool Bruteforce::compare(std::string str){
 	return (this->hash_.compare(sha256(str)) == 0);
 }
 
-void Bruteforce::generate(int length, std::atomic_bool &isFound) {
+void Bruteforce::generate(int length, std::atomic_bool &isFound, int begin, int end) {
 	if(!isFound){
 		std::string str(length, dict.at(0));
-		recursive_generate(str, length, isFound);
+		str.at(0) = dict.at(begin);
+		recursive_generate(str, length, isFound, 0, end);
 	}
 }
 
-void Bruteforce::recursive_generate(std::string str, int length, std::atomic_bool &isFound){
-	if(isFound)return;
+void Bruteforce::recursive_generate(std::string str, int length, std::atomic_bool &isFound, int begin, int end){
+	if(isFound) return;
   	bool finished = false;
   	bool flag = false;
 
@@ -78,6 +85,7 @@ void Bruteforce::recursive_generate(std::string str, int length, std::atomic_boo
   		std::cout << str << std::endl;
   		mutex.unlock();
   	}
+
   	if(compare(str)){
 		std::cout << "Password found: " << str << std::endl;
 		isFound = true;
@@ -90,21 +98,21 @@ void Bruteforce::recursive_generate(std::string str, int length, std::atomic_boo
 					finished = true;
 					continue;
 				}
-				if(str.at(index) == dict.at(dict.size() - 1)){
+				if(str.at(index) == dict.at(end - 1)){
 					flag = true;
 					continue;
 				}else{
-					str.at(index) = dict.at(dict.find(str.at(index)) + 1);
+					str.at(index) = dict.at(dict.find(str.at(index)) + 1 + begin);
 					str.erase(str.begin() + index + 1, str.end());
-					str.append(length - index - 1, 'a');
+					str.append(length - index - 1, dict.at(begin));
 					index = length;
 				}
 			}else{
-				if(str.at(index) == dict.at(dict.size() - 1)){
+				if(str.at(index) == dict.at(end - 1)){
 					flag = true;
 					continue;
 				}else{
-					str.at(index) = dict.at(dict.find(str.at(index)) + 1);
+					str.at(index) = dict.at(dict.find(str.at(index)) + 1 + begin);
 					index = length;
 				}
 			}

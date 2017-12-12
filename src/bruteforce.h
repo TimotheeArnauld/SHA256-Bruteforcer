@@ -31,10 +31,10 @@ class Bruteforce{
         ~Bruteforce();
   
         void start();
-        void generate(int, std::atomic_bool& isFound);
+        void generate(int, std::atomic_bool& isFound, int, int);
         bool compare(std::string);
         void initialize_list();
-        void recursive_generate(std::string, int, std::atomic_bool& isFound);
+        void recursive_generate(std::string, int, std::atomic_bool& isFound, int, int);
 };
 
 #endif
